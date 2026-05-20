@@ -1,0 +1,32 @@
+app = "slack-poll-app"        # change to your unique Fly app name
+primary_region = "dfw"        # Dallas — matches your timezone; pick any region
+
+[build]
+
+[env]
+  RUN_SCHEDULER = "1"
+  DATABASE_URL = "sqlite:////data/polls.db"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false   # keep alive for the scheduler
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/healthz"
+
+[[mounts]]
+  source = "polls_data"
+  destination = "/data"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256

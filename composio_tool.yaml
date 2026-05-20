@@ -1,0 +1,98 @@
+# Composio custom tool definition for slack_create_poll
+# Upload via Composio dashboard → Custom Tools → Import YAML
+# or via: composio custom-tools create --file composio_tool.yaml
+
+name: slack_create_poll
+display_name: Create Slack Poll
+description: >
+  Creates an interactive poll in a Slack channel or DM with click-to-vote
+  buttons, live tallies, and optional anonymity, multi-select, and expiry.
+  Backed by the Enterprise AI Slack Poll App.
+
+categories:
+  - slack
+  - productivity
+
+auth:
+  type: bearer_token
+  env_var: SLACK_POLL_API_TOKEN  # set this in Composio's connection settings
+
+request:
+  method: POST
+  url: "{{SLACK_POLL_BASE_URL}}/api/polls"
+  headers:
+    Content-Type: application/json
+    Authorization: "Bearer {{SLACK_POLL_API_TOKEN}}"
+
+input_schema:
+  type: object
+  required: [channel, question, options]
+  properties:
+    channel:
+      type: string
+      description: >
+        Slack channel ID (e.g. C0B1JC9DFN2), channel name (e.g. "general"),
+        or user ID for a DM. The Poll Bot must be a member of the channel.
+      examples: ["C0B1JC9DFN2", "general", "U09QPJSSXED"]
+    question:
+      type: string
+      description: The poll question. Keep it short (under 150 chars).
+      maxLength: 300
+    options:
+      type: array
+      description: 2–10 answer choices. Include emoji prefixes where they help readability.
+      minItems: 2
+      maxItems: 10
+      items:
+        type: string
+        maxLength: 75
+    anonymous:
+      type: boolean
+      default: false
+      description: Hide who voted for what. Disables the "View voters" button.
+    multi_choice:
+      type: boolean
+      default: false
+      description: Allow voters to select multiple options.
+    expires_in:
+      type: string
+      pattern: '^\d+[mhd]$'
+      description: >
+        Auto-close the poll after this duration. Format: <number><unit>
+        where unit is m (minutes), h (hours), or d (days). e.g. "30m", "2h", "3d".
+      examples: ["30m", "2h", "24h", "3d"]
+    creator_user_id:
+      type: string
+      description: >
+        Slack user ID to attribute as the poll creator (controls who can close it).
+        Defaults to USYSTEM if omitted.
+
+output_schema:
+  type: object
+  properties:
+    poll_id:
+      type: string
+      description: Internal poll ID. Use this for follow-up calls.
+    channel:
+      type: string
+    message_ts:
+      type: string
+      description: Slack message timestamp — use to link back to the poll.
+    expires_at:
+      type: [string, "null"]
+      format: date-time
+
+examples:
+  - name: Simple two-option poll
+    input:
+      channel: "general"
+      question: "Which noodle?"
+      options: ["🍜 Ramen", "🥢 Pho"]
+  - name: Anonymous multi-select with expiry
+    input:
+      channel: "C0B1JC9DFN2"
+      question: "Which themes should we prioritize next quarter?"
+      options: ["AI features", "Performance", "Developer UX", "Security"]
+      multi_choice: true
+      anonymous: true
+      expires_in: "3d"

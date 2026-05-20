@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# Env / secrets
+.env
+
+# Local DB
+*.db
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
