@@ -1,4 +1,5 @@
 # Slack Poll App
+![Live poll example](docs/screenshot.png)
 
 An interactive poll bot for Slack with click-to-vote buttons, live tallies, multi-select, anonymous voting, and auto-expiry. Built with [Bolt for Python](https://slack.dev/bolt-python/) and Flask. Exposes an HTTP API so AI agents can create polls programmatically.
 
